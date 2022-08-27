@@ -7,12 +7,32 @@ Code, Compile, Run and Debug online from anywhere in world.
 
 *******************************************************************************/
 
+using Microsoft.Extensions.Configuration;
+using RabbitMQ.Client;
+
 namespace AlgComparer;
 
 public static class Program
 {
     public static void Main()
     {
+        IConfiguration Configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddEnvironmentVariables()
+            .Build();
+
+        var user = Configuration.GetSection("AMQP_USER").Value;
+        var pass = Configuration.GetSection("AMQP_PASS").Value;
+        var host = Configuration.GetSection("AMQP_ADDR").Value;
+        var port = Configuration.GetSection("AMQP_PORT").Value;
+
+        var factory = new ConnectionFactory();
+        factory.Uri = new Uri($"amqp://{user}:{pass}@{host}:{port}");
+        IConnection conn = factory.CreateConnection();
+
+        conn.Close();
+
+
         string[] games = {"WhiteWin", "Draw", "BlackWin", "WhiteWin", "Draw"};
 
         ChessPrediction[] alg1 =
